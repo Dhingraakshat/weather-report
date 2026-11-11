@@ -98,10 +98,6 @@ python -m src.plots       # save the charts in figures/
 - The 30 °C hot-day threshold is the same for all cities, even though "hot" means something different in Riga and in Delhi.
 - A straight-line trend is a simplification; warming has accelerated in recent decades.
 
-## Use of AI tools
-
-AI assistants were used for guidance, explanations and code review. All code was tested, and I can explain every part of it.
-
 ## License
 
 MIT
