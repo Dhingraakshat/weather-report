@@ -32,7 +32,7 @@ def plot_temperature(yearly, cities):
     ax.set_xlabel("Year")
     ax.set_ylabel("Average temperature (°C)")
     ax.set_title("Yearly average temperature (dashed = trend)")
-    ax.legend()
+    ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
     return fig
 
 
