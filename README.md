@@ -59,6 +59,7 @@ To open the app:
 
 ```bash
 python -m streamlit run app.py
+In the app you can choose the cities, the years and the length of the moving average. You can also download the results table as a CSV file.
 ```
 
 You can also run each part alone:
@@ -110,10 +111,6 @@ What I found:
 ## Problems I had
 
 - At first, only Milan and Rome downloaded. The API stopped me because I sent too many requests too fast. I added a pause of 5 seconds between cities, and after that all four cities worked.
-
-## Use of AI
-
-I used AI tools to help me plan the project, explain things I did not know, and check my code. I tested all the code myself and I can explain every part of it.
 
 ## License
 

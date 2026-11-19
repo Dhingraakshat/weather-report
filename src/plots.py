@@ -36,8 +36,8 @@ def plot_temperature(yearly, cities):
     return fig
 
 
-def plot_anomaly(yearly, city):
-    """Bar chart of yearly temperature anomaly: red = warmer, blue = colder.
+def plot_anomaly(yearly, city, window=10):
+    """Bar chart of yearly temperature anomaly with a moving average line.
 
     Parameters
     ----------
@@ -45,6 +45,8 @@ def plot_anomaly(yearly, city):
         Yearly data with an 'anomaly' column (from analysis.add_anomaly()).
     city : str
         City to show.
+    window : int
+        Number of years used for the moving average.
 
     Returns
     -------
@@ -53,13 +55,16 @@ def plot_anomaly(yearly, city):
     """
     data = yearly[yearly["city"] == city]
     colors = ["tab:red" if value > 0 else "tab:blue" for value in data["anomaly"]]
+    moving_avg = data["anomaly"].rolling(window).mean()
 
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.bar(data["year"], data["anomaly"], color=colors)
+    ax.plot(data["year"], moving_avg, color="black", label=f"{window}-year average")
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_xlabel("Year")
     ax.set_ylabel("Anomaly (°C)")
     ax.set_title(f"{city}: temperature compared to 1961-1990 average")
+    ax.legend()
     return fig
 
 
