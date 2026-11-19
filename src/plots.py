@@ -2,7 +2,8 @@
 
 import matplotlib.pyplot as plt
 
-from src.analysis import trend_line
+from src.analysis import BASELINE_END, BASELINE_START, trend_line
+from src.process import HOT_DAY_THRESHOLD
 
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -63,7 +64,8 @@ def plot_anomaly(yearly, city, window=10):
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_xlabel("Year")
     ax.set_ylabel("Anomaly (°C)")
-    ax.set_title(f"{city}: temperature compared to 1961-1990 average")
+    ax.set_title(f"{city}: temperature compared to "
+                 f"{BASELINE_START}-{BASELINE_END} average")
     ax.legend()
     return fig
 
@@ -119,7 +121,7 @@ def plot_hot_days(yearly, cities):
         data = yearly[yearly["city"] == city]
         ax.plot(data["year"], data["hot_days"], label=city)
     ax.set_xlabel("Year")
-    ax.set_ylabel("Days with max temperature ≥ 30°C")
+    ax.set_ylabel(f"Days with max temperature ≥ {HOT_DAY_THRESHOLD}°C")
     ax.set_title("Hot days per year")
     ax.legend()
     return fig

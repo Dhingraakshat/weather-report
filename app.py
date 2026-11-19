@@ -3,12 +3,14 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from src.analysis import add_anomaly, city_summary
+from src.analysis import (BASELINE_END, BASELINE_START, add_anomaly,
+                          city_summary, seasonal_trends)
 from src.fetch import fetch_all
 from src.plots import (plot_anomaly, plot_hot_days, plot_monthly_heatmap,
                        plot_temperature)
-from src.process import load_data, monthly_summary, yearly_summary
-from src.analysis import add_anomaly, city_summary, seasonal_trends
+from src.process import (HOT_DAY_THRESHOLD, load_data, monthly_summary,
+                         yearly_summary)
+
 
 @st.cache_data
 def get_data():
@@ -28,7 +30,18 @@ def get_data():
 
 
 def show(fig):
-    """Display a matplotlib figure in the app, then close it to free memory."""
+    """Display a matplotlib figure in the app, then close it to free memory.
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        The chart to show.
+
+    Returns
+    -------
+    None
+        The chart is shown in the app, nothing is returned.
+    """
     st.pyplot(fig)
     plt.close(fig)
 
@@ -84,9 +97,10 @@ st.dataframe(table, hide_index=True)
 st.download_button("Download table as CSV", table.to_csv(index=False),
                    file_name="climate_summary.csv", mime="text/csv")
 st.subheader("Warming by season (°C per decade)")
-st.dataframe(seasonal_trends(monthly))
+st.dataframe(seasonal_trends(monthly[monthly["city"].isin(cities)]))
 st.header(f"{focus_city} in detail")
 show(plot_anomaly(yearly, focus_city, window))
 show(plot_monthly_heatmap(monthly, focus_city))
 
-st.caption("Hot day = maximum temperature of 30 °C or more. Anomaly baseline: 1961 to 1990.")
+st.caption(f"Hot day = maximum temperature of {HOT_DAY_THRESHOLD} °C "
+           f"or more. Anomaly baseline: {BASELINE_START} to {BASELINE_END}.")

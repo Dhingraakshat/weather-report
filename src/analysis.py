@@ -7,6 +7,11 @@ from scipy import stats
 BASELINE_START = 1961
 BASELINE_END = 1990
 
+SEASONS = {12: "Winter", 1: "Winter", 2: "Winter",
+           3: "Spring", 4: "Spring", 5: "Spring",
+           6: "Summer", 7: "Summer", 8: "Summer",
+           9: "Autumn", 10: "Autumn", 11: "Autumn"}
+
 
 def add_anomaly(yearly, start=BASELINE_START, end=BASELINE_END):
     """Add the temperature anomaly compared to a baseline period.
@@ -67,6 +72,7 @@ def trend_line(years, values):
     slope, intercept = np.polyfit(years, values, deg=1)
     return slope * np.asarray(years) + intercept
 
+
 def trend_test(years, values):
     """Fit a straight line and test if the trend is significant.
 
@@ -84,11 +90,6 @@ def trend_test(years, values):
     """
     result = stats.linregress(years, values)
     return result.slope * 10, result.pvalue
-
-SEASONS = {12: "Winter", 1: "Winter", 2: "Winter",
-           3: "Spring", 4: "Spring", 5: "Spring",
-           6: "Summer", 7: "Summer", 8: "Summer",
-           9: "Autumn", 10: "Autumn", 11: "Autumn"}
 
 
 def seasonal_trends(monthly):
@@ -110,13 +111,16 @@ def seasonal_trends(monthly):
 
     rows = []
     for (city, season), group in seasonal.groupby(["city", "season"]):
+        warming = trend_per_decade(group["year"], group["temp_mean"])
         rows.append({
             "city": city,
             "season": season,
-            "warming_per_decade": round(trend_per_decade(group["year"], group["temp_mean"]), 2),
+            "warming_per_decade": round(warming, 2),
         })
-    table = pd.DataFrame(rows).pivot(index="city", columns="season", values="warming_per_decade")
+    table = pd.DataFrame(rows).pivot(index="city", columns="season",
+                                     values="warming_per_decade")
     return table[["Winter", "Spring", "Summer", "Autumn"]]
+
 
 def city_summary(yearly, period=30):
     """Build a table with the main climate numbers for each city.
@@ -162,5 +166,5 @@ if __name__ == "__main__":
 
     daily = load_data()
     yearly = add_anomaly(yearly_summary(daily))
-    print(city_summary(yearly))
+    print(city_summary(yearly).to_string())
     print(seasonal_trends(monthly_summary(daily)))

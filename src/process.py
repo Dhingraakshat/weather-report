@@ -1,10 +1,9 @@
 """Load the downloaded CSV files and prepare them for analysis."""
 
-from pathlib import Path
-
 import pandas as pd
 
-DATA_DIR = Path("data")
+from src.fetch import DATA_DIR
+
 HOT_DAY_THRESHOLD = 30  # °C, a day with max temperature >= 30 counts as "hot"
 
 

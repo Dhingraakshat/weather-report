@@ -1,5 +1,6 @@
 """Download historical daily weather data from the Open-Meteo API."""
 
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -7,6 +8,7 @@ import requests
 
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 DATA_DIR = Path("data")
+PAUSE_SECONDS = 5  # pause between two downloads
 
 CITIES = {
     "Milan": (45.46, 9.19),
@@ -53,7 +55,21 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
 
 
 def fetch_all(cities=CITIES):
-    """Download data for every city and save each one as a CSV in data/."""
+    """Download data for every city and save each one as a CSV in data/.
+
+    Cities that already have a CSV file are skipped. After each download
+    the function waits a few seconds, so the API does not block us.
+
+    Parameters
+    ----------
+    cities : dict
+        City name as key and (latitude, longitude) as value.
+
+    Returns
+    -------
+    None
+        The data is saved to files, nothing is returned.
+    """
     DATA_DIR.mkdir(exist_ok=True)
     for name, (lat, lon) in cities.items():
         path = DATA_DIR / f"{name.lower()}.csv"
@@ -63,6 +79,7 @@ def fetch_all(cities=CITIES):
         df = fetch_city(name, lat, lon)
         df.to_csv(path, index=False)
         print(f"{name}: saved {len(df)} rows to {path}")
+        time.sleep(PAUSE_SECONDS)  # wait, so the API does not block us
 
 
 if __name__ == "__main__":

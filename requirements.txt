@@ -3,5 +3,5 @@ numpy==2.4.0
 pandas==3.0.1
 requests==2.32.5
 streamlit==1.67.0
-spicy==1.16.3
+scipy==1.16.3
 pytest==9.2.0
