@@ -24,15 +24,29 @@ It is free and you do not need an API key. For every day I download:
 
 The data is not saved in this repository. The script `src/fetch.py` downloads it into the `data` folder. The app also does this by itself the first time you run it.
 
+## Libraries
+
+- `requests` downloads the data from the API
+- `pandas` loads the data and makes the yearly and monthly tables
+- `numpy` fits the straight trend line
+- `scipy` calculates the p-value of the trend
+- `matplotlib` makes the charts
+- `streamlit` runs the app
+- `pytest` runs the tests
+
+The exact versions are in `requirements.txt`.
+
 ## Files
 
 ```
 weather-report/
     app.py              the Streamlit app
     requirements.txt    the libraries I use
+    LICENSE             the MIT license
     figures/            the charts
     data/               the downloaded CSV files (not on GitHub)
-    tests/              the tests
+    notebooks/          exploration.ipynb, my first look at the data
+    tests/              the tests (test_project.py)
     src/
         fetch.py        downloads the data from the API
         process.py      loads and cleans the data, makes yearly and monthly tables
@@ -42,7 +56,7 @@ weather-report/
 
 ## How to install
 
-You need Python 3.10 or newer.
+You need Python 3.11 or newer.
 
 ```bash
 git clone https://github.com/Dhingraakshat/weather-report.git
@@ -52,7 +66,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-On Mac or Linux, use `source .venv/bin/activate` instead of the third line.
+On Mac or Linux, use `source .venv/bin/activate` instead of the fourth line.
 
 ## How to run
 
@@ -60,8 +74,9 @@ To open the app:
 
 ```bash
 python -m streamlit run app.py
-In the app you can choose the cities, the years and the length of the moving average. You can also download the results table as a CSV file.
 ```
+
+In the app you can choose the cities, the years and the length of the moving average. You can also download the results table as a CSV file.
 
 You can also run each part alone:
 
@@ -70,11 +85,14 @@ python -m src.fetch       # download the data
 python -m src.analysis    # print the results table
 python -m src.plots       # save the charts in the figures folder
 ```
+
 ## Tests
 
 I wrote some small tests with pytest. They check the trend, the anomaly, the hot day count and the error when the data is missing. To run them:
 
-    python -m pytest
+```bash
+python -m pytest
+```
 
 ## What I did
 
@@ -85,6 +103,7 @@ I wrote some small tests with pytest. They check the trend, the anomaly, the hot
 - I also compared the average of the first 30 years (1950 to 1979) with the last 30 years (1996 to 2025).
 - In the heatmap, I compare every month with the normal value for that month. Without this, the chart only shows that summer is hot and winter is cold.
 - I also calculated the trend for each season (winter, spring, summer, autumn), to see if some parts of the year get warmer faster than others.
+
 ## Results
 
 | City | Change per 10 years (°C) | p-value | Significant | First 30 years (°C) | Last 30 years (°C) | Difference (°C) | Hot days, change per 10 years |
@@ -103,13 +122,14 @@ Warming by season (°C per 10 years):
 | Rome | +0.15 | +0.23 | +0.40 | +0.23 |
 | Riga | +0.47 | +0.42 | +0.23 | +0.19 |
 | Delhi | -0.03 | -0.11 | -0.09 | +0.13 |
+
 What I found:
 
-- Milan gets warmer faster than the other cities. Since 1950 it is about 3 °C warmer. Almost every year after 1990 was warmer than the 1961 to 1990 average.
+- Milan gets warmer faster than the other cities. The trend line goes up about 3 °C from 1950 to 2025 (0.41 °C per 10 years for 7.5 decades). The last 30 years are 1.93 °C warmer than the first 30 years. Every year after 1990 was warmer than the 1961 to 1990 average.
 - The warming happens in all months, also in winter, not only in summer.
 - Rome gets warmer more slowly than Milan, but it gets more new hot days. I think this is because summers in Rome were already close to 30 °C, so a small change makes many more days go over 30 °C.
 - Riga gets warmer too, but it still has almost no hot days, because it is rarely that hot there.
-- - Delhi does not show a warming trend in this data. The p-value is 0.34, so the small change could be just random. I was surprised by this. Some studies say that air pollution and more irrigation in north India can make temperatures lower, but I did not test this in my project.
+- Delhi does not show a warming trend in this data. The p-value is 0.34, so the small change could be just random. I was surprised by this. Some studies say that air pollution and more irrigation in north India can make temperatures lower, but I did not test this in my project.
 - In Milan and Rome, summer gets warmer the fastest. In Riga it is the opposite: winter and spring get warmer faster than summer. This is also why Riga still has almost no hot days. For Delhi the values are small and go in both directions, so there is no clear change.
 
 ![Yearly temperature](figures/temperature.png)
