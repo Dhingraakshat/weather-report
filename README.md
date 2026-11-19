@@ -74,17 +74,18 @@ python -m src.plots       # save the charts in the figures folder
 - I grouped the daily data by city and year. For each year I took the average temperature, the total rain and the number of hot days.
 - For the anomaly, I took the average temperature of 1961 to 1990 for each city. Then for every year I calculated how much warmer or colder it was than this average. 1961 to 1990 is a normal reference period in climate studies.
 - For the trend, I used `numpy.polyfit` to fit a straight line through the yearly temperatures. I show the result in °C per 10 years, because per year the numbers are very small.
+- To check if the trend is real or just random, I used `scipy.stats.linregress`. It gives a p-value. If the p-value is smaller than 0.05, I say the trend is significant.
 - I also compared the average of the first 30 years (1950 to 1979) with the last 30 years (1996 to 2025).
 - In the heatmap, I compare every month with the normal value for that month. Without this, the chart only shows that summer is hot and winter is cold.
 
 ## Results
 
-| City | Change per 10 years (°C) | First 30 years (°C) | Last 30 years (°C) | Difference (°C) | Hot days, change per 10 years |
-|---|---|---|---|---|---|
-| Milan | +0.41 | 11.32 | 13.25 | +1.93 | +4.6 |
-| Rome | +0.25 | 14.74 | 15.92 | +1.18 | +6.7 |
-| Riga | +0.33 | 6.20 | 7.68 | +1.49 | +0.4 |
-| Delhi | -0.03 | 24.75 | 24.59 | -0.16 | +1.0 |
+| City | Change per 10 years (°C) | p-value | Significant | First 30 years (°C) | Last 30 years (°C) | Difference (°C) | Hot days, change per 10 years |
+|---|---|---|---|---|---|---|---|
+| Milan | +0.41 | < 0.0001 | Yes | 11.32 | 13.25 | +1.93 | +4.6 |
+| Rome | +0.25 | < 0.0001 | Yes | 14.74 | 15.92 | +1.18 | +6.7 |
+| Riga | +0.33 | < 0.0001 | Yes | 6.20 | 7.68 | +1.49 | +0.4 |
+| Delhi | -0.03 | 0.34 | No | 24.75 | 24.59 | -0.16 | +1.0 |
 
 What I found:
 
@@ -92,7 +93,7 @@ What I found:
 - The warming happens in all months, also in winter, not only in summer.
 - Rome gets warmer more slowly than Milan, but it gets more new hot days. I think this is because summers in Rome were already close to 30 °C, so a small change makes many more days go over 30 °C.
 - Riga gets warmer too, but it still has almost no hot days, because it is rarely that hot there.
-- Delhi does not show a warming trend in this data. I was surprised by this. Some studies say that air pollution and more irrigation in north India can make temperatures lower, but I did not test this in my project.
+- - Delhi does not show a warming trend in this data. The p-value is 0.34, so the small change could be just random. I was surprised by this. Some studies say that air pollution and more irrigation in north India can make temperatures lower, but I did not test this in my project.
 
 ![Yearly temperature](figures/temperature.png)
 ![Milan anomaly](figures/anomaly_milan.png)
@@ -104,6 +105,7 @@ What I found:
 - The data is not from one weather station in each city. It comes from a weather model that mixes real measurements and calculations.
 - I use 30 °C as a hot day for all cities, but a hot day in Riga is not the same as a hot day in Delhi.
 - A straight line is a simple way to show the trend. In reality, the warming is faster in the last years than at the start.
+- The p-value test thinks that every year is independent. But a warm year is often followed by another warm year, so the real p-values are probably a bit bigger. For Milan, Rome and Riga they are so small that this does not change the result.
 
 ## Problems I had
 

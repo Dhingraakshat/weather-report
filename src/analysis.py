@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 BASELINE_START = 1961
 BASELINE_END = 1990
@@ -66,6 +67,23 @@ def trend_line(years, values):
     slope, intercept = np.polyfit(years, values, deg=1)
     return slope * np.asarray(years) + intercept
 
+def trend_test(years, values):
+    """Fit a straight line and test if the trend is significant.
+
+    Parameters
+    ----------
+    years : array-like
+        The years (x axis).
+    values : array-like
+        The values for each year (y axis).
+
+    Returns
+    -------
+    tuple of float
+        Change per decade and the p-value of the trend.
+    """
+    result = stats.linregress(years, values)
+    return result.slope * 10, result.pvalue
 
 def city_summary(yearly, period=30):
     """Build a table with the main climate numbers for each city.
@@ -91,10 +109,13 @@ def city_summary(yearly, period=30):
 
         old_avg = np.mean(temps[:period])
         recent_avg = np.mean(temps[-period:])
+        warming, p_value = trend_test(years, temps)
 
         rows.append({
             "city": city,
-            "warming_per_decade": round(trend_per_decade(years, temps), 2),
+            "warming_per_decade": round(warming, 2),
+            "p_value": round(p_value, 4),
+            "significant": p_value < 0.05,
             "old_avg_temp": round(old_avg, 2),
             "recent_avg_temp": round(recent_avg, 2),
             "difference": round(recent_avg - old_avg, 2),
