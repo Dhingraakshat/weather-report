@@ -26,24 +26,30 @@ def test_trend_test_on_straight_line():
 
 def test_anomaly_is_zero_on_average_in_baseline():
     """The anomaly is the difference from the baseline average (11.0 here)."""
-    yearly = pd.DataFrame({
-        "city": ["Milan"] * 4,
-        "year": [2000, 2001, 2002, 2003],
-        "temp_mean": [10.0, 12.0, 14.0, 16.0],
-    })
+    yearly = pd.DataFrame(
+        {
+            "city": ["Milan"] * 4,
+            "year": [2000, 2001, 2002, 2003],
+            "temp_mean": [10.0, 12.0, 14.0, 16.0],
+        }
+    )
     result = add_anomaly(yearly, start=2000, end=2001)
     assert result["anomaly"].tolist() == [-1.0, 1.0, 3.0, 5.0]
 
 
 def test_hot_days_counts_years_with_zero():
     """Years with no hot days must be counted as 0, not left out."""
-    daily = pd.DataFrame({
-        "city": ["Milan"] * 4,
-        "date": pd.to_datetime(["2000-07-01", "2000-07-02", "2001-07-01", "2001-07-02"]),
-        "temp_mean": [25.0, 26.0, 20.0, 21.0],
-        "temp_max": [31.0, 29.0, 25.0, 26.0],
-        "rain": [0.0, 2.0, 1.0, 1.0],
-    })
+    daily = pd.DataFrame(
+        {
+            "city": ["Milan"] * 4,
+            "date": pd.to_datetime(
+                ["2000-07-01", "2000-07-02", "2001-07-01", "2001-07-02"]
+            ),
+            "temp_mean": [25.0, 26.0, 20.0, 21.0],
+            "temp_max": [31.0, 29.0, 25.0, 26.0],
+            "rain": [0.0, 2.0, 1.0, 1.0],
+        }
+    )
     result = yearly_summary(daily)
     assert result["hot_days"].tolist() == [1, 0]
     assert result["rain"].tolist() == [2.0, 2.0]
@@ -51,14 +57,17 @@ def test_hot_days_counts_years_with_zero():
 
 def test_heavy_rain_days_counts_years_with_zero():
     """Years with no heavy rain days must be counted as 0, not left out."""
-    daily = pd.DataFrame({
-        "city": ["Milan"] * 4,
-        "date": pd.to_datetime(["2000-10-01", "2000-10-02",
-                                "2001-10-01", "2001-10-02"]),
-        "temp_mean": [15.0, 15.0, 15.0, 15.0],
-        "temp_max": [20.0, 20.0, 20.0, 20.0],
-        "rain": [25.0, 20.0, 19.9, 0.0],
-    })
+    daily = pd.DataFrame(
+        {
+            "city": ["Milan"] * 4,
+            "date": pd.to_datetime(
+                ["2000-10-01", "2000-10-02", "2001-10-01", "2001-10-02"]
+            ),
+            "temp_mean": [15.0, 15.0, 15.0, 15.0],
+            "temp_max": [20.0, 20.0, 20.0, 20.0],
+            "rain": [25.0, 20.0, 19.9, 0.0],
+        }
+    )
     result = yearly_summary(daily)
     assert result["heavy_rain_days"].tolist() == [2, 0]
 

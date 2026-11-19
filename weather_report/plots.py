@@ -14,8 +14,20 @@ CITY_COLORS = {
     "Delhi": "tab:purple",
 }
 
-MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+MONTH_NAMES = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
 
 
 def plot_temperature(yearly, cities, title=None):
@@ -39,10 +51,15 @@ def plot_temperature(yearly, cities, title=None):
     for city in cities:
         data = yearly[yearly["city"] == city]
         color = CITY_COLORS[city]
-        ax.plot(data["year"], data["temp_mean"], color=color, label=city,
-                alpha=0.6)
-        ax.plot(data["year"], trend_line(data["year"], data["temp_mean"]),
-                color=color, linestyle="--")
+        ax.plot(
+            data["year"], data["temp_mean"], color=color, label=city, alpha=0.6
+        )
+        ax.plot(
+            data["year"],
+            trend_line(data["year"], data["temp_mean"]),
+            color=color,
+            linestyle="--",
+        )
     if title is None:
         title = "Yearly average temperature"
     ax.set_xlabel("Year")
@@ -73,18 +90,24 @@ def plot_anomaly(yearly, city, window=10, title=None):
         The finished chart.
     """
     data = yearly[yearly["city"] == city]
-    colors = ["tab:red" if value > 0 else "tab:blue" for value in data["anomaly"]]
+    colors = [
+        "tab:red" if value > 0 else "tab:blue" for value in data["anomaly"]
+    ]
     moving_avg = data["anomaly"].rolling(window).mean()
 
     fig, ax = plt.subplots(figsize=(10, 4), layout="constrained")
     ax.bar(data["year"], data["anomaly"], color=colors)
-    ax.plot(data["year"], moving_avg, color="black", label=f"{window}-year average")
+    ax.plot(
+        data["year"], moving_avg, color="black", label=f"{window}-year average"
+    )
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_xlabel("Year")
     ax.set_ylabel("Anomaly (°C)")
     if title is None:
-        title = (f"{city}: temperature compared to the "
-                 f"{BASELINE_START}-{BASELINE_END} average")
+        title = (
+            f"{city}: temperature compared to the "
+            f"{BASELINE_START}-{BASELINE_END} average"
+        )
     ax.set_title(title)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend()
@@ -114,8 +137,14 @@ def plot_monthly_heatmap(monthly, city, title=None):
 
     first_year, last_year = table.columns.min(), table.columns.max()
     fig, ax = plt.subplots(figsize=(12, 4), layout="constrained")
-    image = ax.imshow(table, aspect="auto", cmap="coolwarm", vmin=-4, vmax=4,
-                      extent=[first_year - 0.5, last_year + 0.5, 12.5, 0.5])
+    image = ax.imshow(
+        table,
+        aspect="auto",
+        cmap="coolwarm",
+        vmin=-4,
+        vmax=4,
+        extent=[first_year - 0.5, last_year + 0.5, 12.5, 0.5],
+    )
     fig.colorbar(image, ax=ax, label="°C vs month average")
     ax.set_yticks(range(1, 13))
     ax.set_yticklabels(MONTH_NAMES)
@@ -148,8 +177,9 @@ def plot_hot_days(yearly, cities, title=None):
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
-        ax.plot(data["year"], data["hot_days"], color=CITY_COLORS[city],
-                label=city)
+        ax.plot(
+            data["year"], data["hot_days"], color=CITY_COLORS[city], label=city
+        )
     if title is None:
         title = "Hot days per year"
     ax.set_xlabel("Year")
@@ -180,8 +210,12 @@ def plot_heavy_rain_days(yearly, cities, title=None):
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
-        ax.plot(data["year"], data["heavy_rain_days"],
-                color=CITY_COLORS[city], label=city)
+        ax.plot(
+            data["year"],
+            data["heavy_rain_days"],
+            color=CITY_COLORS[city],
+            label=city,
+        )
     if title is None:
         title = "Heavy rain days per year"
     ax.set_xlabel("Year")
@@ -196,8 +230,11 @@ if __name__ == "__main__":
     from pathlib import Path
 
     from weather_report.analysis import add_anomaly
-    from weather_report.process import (load_data, monthly_summary,
-                                        yearly_summary)
+    from weather_report.process import (
+        load_data,
+        monthly_summary,
+        yearly_summary,
+    )
 
     daily = load_data()
     yearly = add_anomaly(yearly_summary(daily))
@@ -211,21 +248,31 @@ if __name__ == "__main__":
     # the main message. I checked each message with the numbers.
     charts = {
         "temperature.png": plot_temperature(
-            yearly, cities,
-            title="Milan, Rome and Riga get warmer, Delhi does not"),
+            yearly,
+            cities,
+            title="Milan, Rome and Riga get warmer, Delhi does not",
+        ),
         "anomaly_milan.png": plot_anomaly(
-            yearly, "Milan",
+            yearly,
+            "Milan",
             title="Milan: every year since 1985 was warmer than "
-                  "the 1961-1990 average"),
+            "the 1961-1990 average",
+        ),
         "heatmap_milan.png": plot_monthly_heatmap(
-            monthly, "Milan",
-            title="Milan: since 1990, most months are warmer than usual"),
+            monthly,
+            "Milan",
+            title="Milan: since 1990, most months are warmer than usual",
+        ),
         "hot_days.png": plot_hot_days(
-            yearly, cities,
-            title="Milan and Rome now have many more hot days than before"),
+            yearly,
+            cities,
+            title="Milan and Rome now have many more hot days than before",
+        ),
         "heavy_rain_days.png": plot_heavy_rain_days(
-            yearly, cities,
-            title="Heavy rain days go up and down, with no clear trend"),
+            yearly,
+            cities,
+            title="Heavy rain days go up and down, with no clear trend",
+        ),
     }
     for filename, fig in charts.items():
         fig.savefig(output_dir / filename, dpi=150, bbox_inches="tight")

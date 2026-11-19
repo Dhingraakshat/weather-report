@@ -3,16 +3,28 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from weather_report.analysis import (BASELINE_END, BASELINE_START,
-                                     add_anomaly, city_summary,
-                                     seasonal_trends)
+from weather_report.analysis import (
+    BASELINE_END,
+    BASELINE_START,
+    add_anomaly,
+    city_summary,
+    seasonal_trends,
+)
 from weather_report.fetch import fetch_all
-from weather_report.plots import (plot_anomaly, plot_heavy_rain_days,
-                                  plot_hot_days, plot_monthly_heatmap,
-                                  plot_temperature)
-from weather_report.process import (HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD,
-                                    load_data, monthly_summary,
-                                    yearly_summary)
+from weather_report.plots import (
+    plot_anomaly,
+    plot_heavy_rain_days,
+    plot_hot_days,
+    plot_monthly_heatmap,
+    plot_temperature,
+)
+from weather_report.process import (
+    HEAVY_RAIN_THRESHOLD,
+    HOT_DAY_THRESHOLD,
+    load_data,
+    monthly_summary,
+    yearly_summary,
+)
 
 
 @st.cache_data
@@ -51,8 +63,10 @@ def show(fig):
 
 st.set_page_config(page_title="Weather Report", layout="wide")
 st.title("Is Milan getting hotter?")
-st.write("Climate trends from 1950 to 2025, using daily data from the "
-         "Open-Meteo Historical Weather API.")
+st.write(
+    "Climate trends from 1950 to 2025, using daily data from the "
+    "Open-Meteo Historical Weather API."
+)
 
 with st.spinner("Loading weather data..."):
     yearly, monthly = get_data()
@@ -62,10 +76,15 @@ first_year = int(yearly["year"].min())
 last_year = int(yearly["year"].max())
 
 st.sidebar.header("Settings")
-cities = st.sidebar.multiselect("Cities to compare", all_cities, default=all_cities)
-focus_city = st.sidebar.selectbox("City for detailed view", all_cities,
-                                  index=all_cities.index("Milan"))
-start, end = st.sidebar.slider("Years", first_year, last_year, (first_year, last_year))
+cities = st.sidebar.multiselect(
+    "Cities to compare", all_cities, default=all_cities
+)
+focus_city = st.sidebar.selectbox(
+    "City for detailed view", all_cities, index=all_cities.index("Milan")
+)
+start, end = st.sidebar.slider(
+    "Years", first_year, last_year, (first_year, last_year)
+)
 window = st.sidebar.slider("Moving average (years)", 2, 20, 10)
 
 if not cities:
@@ -86,9 +105,15 @@ row = summary[summary["city"] == focus_city].iloc[0]
 st.header(f"{focus_city} at a glance")
 col1, col2, col3 = st.columns(3)
 col1.metric("Warming trend", f"{row['warming_per_decade']} °C / decade")
-col2.metric(f"Last {period} years average", f"{row['recent_avg_temp']} °C",
-            f"{row['difference']:+} °C vs first {period} years", delta_color="inverse")
-col3.metric("Hot days trend", f"{row['hot_days_change_per_decade']:+} days / decade")
+col2.metric(
+    f"Last {period} years average",
+    f"{row['recent_avg_temp']} °C",
+    f"{row['difference']:+} °C vs first {period} years",
+    delta_color="inverse",
+)
+col3.metric(
+    "Hot days trend", f"{row['hot_days_change_per_decade']:+} days / decade"
+)
 
 st.header("Comparing cities")
 show(plot_temperature(yearly, cities))
@@ -98,14 +123,20 @@ show(plot_heavy_rain_days(yearly, cities))
 st.subheader("Summary table")
 table = summary[summary["city"].isin(cities)]
 st.dataframe(table, hide_index=True)
-st.download_button("Download table as CSV", table.to_csv(index=False),
-                   file_name="climate_summary.csv", mime="text/csv")
+st.download_button(
+    "Download table as CSV",
+    table.to_csv(index=False),
+    file_name="climate_summary.csv",
+    mime="text/csv",
+)
 st.subheader("Warming by season (°C per decade)")
 st.dataframe(seasonal_trends(monthly[monthly["city"].isin(cities)]))
 st.header(f"{focus_city} in detail")
 show(plot_anomaly(yearly, focus_city, window))
 show(plot_monthly_heatmap(monthly, focus_city))
 
-st.caption(f"Hot day = maximum temperature of {HOT_DAY_THRESHOLD} °C "
-           f"or more. Heavy rain day = {HEAVY_RAIN_THRESHOLD} mm of rain "
-           f"or more. Anomaly baseline: {BASELINE_START} to {BASELINE_END}.")
+st.caption(
+    f"Hot day = maximum temperature of {HOT_DAY_THRESHOLD} °C "
+    f"or more. Heavy rain day = {HEAVY_RAIN_THRESHOLD} mm of rain "
+    f"or more. Anomaly baseline: {BASELINE_START} to {BASELINE_END}."
+)

@@ -51,17 +51,21 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
         "timezone": "auto",
     }
     try:
-        response = requests.get(API_URL, params=params,
-                                timeout=TIMEOUT_SECONDS)
+        response = requests.get(
+            API_URL, params=params, timeout=TIMEOUT_SECONDS
+        )
         response.raise_for_status()
     except requests.exceptions.Timeout as error:
         # Timeout is a special kind of RequestException,
         # so it must come first, or this message would never be used.
         raise RuntimeError(
             f"The API did not answer within {TIMEOUT_SECONDS} seconds "
-            f"for {name}. Please try again later.") from error
+            f"for {name}. Please try again later."
+        ) from error
     except requests.RequestException as error:
-        raise RuntimeError(f"Could not download data for {name}: {error}") from error
+        raise RuntimeError(
+            f"Could not download data for {name}: {error}"
+        ) from error
 
     df = pd.DataFrame(response.json()["daily"])
     df["city"] = name

@@ -1,0 +1,3 @@
+# Settings for Ruff, the tool I use to check and format the code.
+# 79 characters per line, like PEP 8 says.
+line-length = 79

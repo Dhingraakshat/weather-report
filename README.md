@@ -37,12 +37,21 @@ The data is not saved in this repository. The script `weather_report/fetch.py` d
 
 The exact versions are in `requirements.txt`.
 
+I also used Ruff (version 0.17.5) to check the code and to format it in the PEP 8 style. Ruff is not in `requirements.txt`, because my code does not import it. It is only a tool for writing the code. If you want to use it:
+
+```bash
+pip install ruff
+ruff check .
+ruff format .
+```
+
 ## Files
 
 ```
 weather-report/
     app.py              the Streamlit app
     requirements.txt    the libraries I use
+    ruff.toml           the settings for Ruff (79 characters per line)
     LICENSE             the MIT license
     figures/            the charts
     data/               the downloaded CSV files (not on GitHub)

@@ -28,16 +28,19 @@ def load_data(data_dir=DATA_DIR):
     """
     files = list(data_dir.glob("*.csv"))
     if not files:
-        raise FileNotFoundError("No CSV files found. "
-                                "Run 'python -m weather_report.fetch' first.")
+        raise FileNotFoundError(
+            "No CSV files found. Run 'python -m weather_report.fetch' first."
+        )
 
     df = pd.concat([pd.read_csv(file) for file in files], ignore_index=True)
-    df = df.rename(columns={
-        "time": "date",
-        "temperature_2m_mean": "temp_mean",
-        "temperature_2m_max": "temp_max",
-        "precipitation_sum": "rain",
-    })
+    df = df.rename(
+        columns={
+            "time": "date",
+            "temperature_2m_mean": "temp_mean",
+            "temperature_2m_max": "temp_max",
+            "precipitation_sum": "rain",
+        }
+    )
     df["date"] = pd.to_datetime(df["date"])
     return df.dropna()
 
