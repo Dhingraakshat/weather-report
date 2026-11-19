@@ -22,7 +22,7 @@ It is free and you do not need an API key. For every day I download:
 - the max temperature
 - the total rain
 
-The data is not saved in this repository. The script `src/fetch.py` downloads it into the `data` folder. The app also does this by itself the first time you run it.
+The data is not saved in this repository. The script `weather_report/fetch.py` downloads it into the `data` folder. The app also does this by itself the first time you run it.
 
 ## Libraries
 
@@ -47,7 +47,8 @@ weather-report/
     data/               the downloaded CSV files (not on GitHub)
     notebooks/          exploration.ipynb, my first look at the data
     tests/              the tests (test_project.py)
-    src/
+    weather_report/     the Python package with my code
+        __init__.py     makes the folder a package
         fetch.py        downloads the data from the API
         process.py      loads and cleans the data, makes yearly and monthly tables
         analysis.py     calculates the anomaly and the warming trend
@@ -81,9 +82,9 @@ In the app you can choose the cities, the years and the length of the moving ave
 You can also run each part alone:
 
 ```bash
-python -m src.fetch       # download the data
-python -m src.analysis    # print the results table
-python -m src.plots       # save the charts in the figures folder
+python -m weather_report.fetch       # download the data
+python -m weather_report.analysis    # print the results table
+python -m weather_report.plots       # save the charts in the figures folder
 ```
 
 ## Tests

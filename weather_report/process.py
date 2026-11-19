@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from src.fetch import DATA_DIR
+from weather_report.fetch import DATA_DIR
 
 HOT_DAY_THRESHOLD = 30  # °C, a day with max temperature >= 30 counts as "hot"
 HEAVY_RAIN_THRESHOLD = 20  # mm, a day with rain >= 20 counts as "heavy rain"
@@ -23,7 +23,8 @@ def load_data(data_dir=DATA_DIR):
     """
     files = list(data_dir.glob("*.csv"))
     if not files:
-        raise FileNotFoundError("No CSV files found. Run 'python -m src.fetch' first.")
+        raise FileNotFoundError("No CSV files found. "
+                                "Run 'python -m weather_report.fetch' first.")
 
     df = pd.concat([pd.read_csv(file) for file in files], ignore_index=True)
     df = df.rename(columns={

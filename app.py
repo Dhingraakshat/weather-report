@@ -3,13 +3,16 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from src.analysis import (BASELINE_END, BASELINE_START, add_anomaly,
-                          city_summary, seasonal_trends)
-from src.fetch import fetch_all
-from src.plots import (plot_anomaly, plot_heavy_rain_days, plot_hot_days,
-                       plot_monthly_heatmap, plot_temperature)
-from src.process import (HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD, load_data,
-                         monthly_summary, yearly_summary)
+from weather_report.analysis import (BASELINE_END, BASELINE_START,
+                                     add_anomaly, city_summary,
+                                     seasonal_trends)
+from weather_report.fetch import fetch_all
+from weather_report.plots import (plot_anomaly, plot_heavy_rain_days,
+                                  plot_hot_days, plot_monthly_heatmap,
+                                  plot_temperature)
+from weather_report.process import (HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD,
+                                    load_data, monthly_summary,
+                                    yearly_summary)
 
 
 @st.cache_data

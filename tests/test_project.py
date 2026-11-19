@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.analysis import add_anomaly, trend_per_decade, trend_test
-from src.process import load_data, yearly_summary
+from weather_report.analysis import add_anomaly, trend_per_decade, trend_test
+from weather_report.process import load_data, yearly_summary
 
 
 def test_trend_of_straight_line():

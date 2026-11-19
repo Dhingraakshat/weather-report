@@ -2,8 +2,8 @@
 
 import matplotlib.pyplot as plt
 
-from src.analysis import BASELINE_END, BASELINE_START, trend_line
-from src.process import HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD
+from weather_report.analysis import BASELINE_END, BASELINE_START, trend_line
+from weather_report.process import HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD
 
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -156,8 +156,9 @@ def plot_heavy_rain_days(yearly, cities):
 if __name__ == "__main__":
     from pathlib import Path
 
-    from src.analysis import add_anomaly
-    from src.process import load_data, monthly_summary, yearly_summary
+    from weather_report.analysis import add_anomaly
+    from weather_report.process import (load_data, monthly_summary,
+                                        yearly_summary)
 
     daily = load_data()
     yearly = add_anomaly(yearly_summary(daily))

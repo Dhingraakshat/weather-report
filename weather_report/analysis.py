@@ -170,7 +170,8 @@ def city_summary(yearly, period=30):
 
 
 if __name__ == "__main__":
-    from src.process import load_data, monthly_summary, yearly_summary
+    from weather_report.process import (load_data, monthly_summary,
+                                        yearly_summary)
 
     daily = load_data()
     yearly = add_anomaly(yearly_summary(daily))

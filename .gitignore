@@ -219,5 +219,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Downloaded weather data (made by src/fetch.py)
+# Downloaded weather data (made by weather_report/fetch.py)
 data/
