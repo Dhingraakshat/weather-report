@@ -8,7 +8,7 @@ import requests
 
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 DATA_DIR = Path("data")
-PAUSE_SECONDS = 5  # pause between two downloads
+PAUSE_SECONDS = 60  # pause between two downloads (API limit per minute)
 
 CITIES = {
     "Milan": (45.46, 9.19),
