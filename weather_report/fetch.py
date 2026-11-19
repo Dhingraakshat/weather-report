@@ -9,6 +9,7 @@ import requests
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 DATA_DIR = Path("data")
 PAUSE_SECONDS = 60  # pause between two downloads (API limit per minute)
+TIMEOUT_SECONDS = 60  # stop waiting if the API does not answer in time
 
 CITIES = {
     "Milan": (45.46, 9.19),
@@ -34,6 +35,12 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
     -------
     pandas.DataFrame
         One row per day with mean/max temperature and precipitation.
+
+    Raises
+    ------
+    RuntimeError
+        If the API does not answer in time, or if the download fails
+        (no internet, wrong address, or an error from the API).
     """
     params = {
         "latitude": lat,
@@ -44,8 +51,15 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
         "timezone": "auto",
     }
     try:
-        response = requests.get(API_URL, params=params, timeout=60)
+        response = requests.get(API_URL, params=params,
+                                timeout=TIMEOUT_SECONDS)
         response.raise_for_status()
+    except requests.exceptions.Timeout as error:
+        # Timeout is a special kind of RequestException,
+        # so it must come first, or this message would never be used.
+        raise RuntimeError(
+            f"The API did not answer within {TIMEOUT_SECONDS} seconds "
+            f"for {name}. Please try again later.") from error
     except requests.RequestException as error:
         raise RuntimeError(f"Could not download data for {name}: {error}") from error
 

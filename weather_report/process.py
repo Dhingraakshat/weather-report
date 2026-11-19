@@ -20,6 +20,11 @@ def load_data(data_dir=DATA_DIR):
     -------
     pandas.DataFrame
         All cities together, one row per city per day.
+
+    Raises
+    ------
+    FileNotFoundError
+        If there are no CSV files in the folder.
     """
     files = list(data_dir.glob("*.csv"))
     if not files:
