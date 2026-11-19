@@ -32,6 +32,7 @@ weather-report/
     requirements.txt    the libraries I use
     figures/            the charts
     data/               the downloaded CSV files (not on GitHub)
+    tests/              the tests
     src/
         fetch.py        downloads the data from the API
         process.py      loads and cleans the data, makes yearly and monthly tables
@@ -69,6 +70,11 @@ python -m src.fetch       # download the data
 python -m src.analysis    # print the results table
 python -m src.plots       # save the charts in the figures folder
 ```
+## Tests
+
+I wrote some small tests with pytest. They check the trend, the anomaly, the hot day count and the error when the data is missing. To run them:
+
+    python -m pytest
 
 ## What I did
 
