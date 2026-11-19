@@ -6,10 +6,10 @@ import streamlit as st
 from src.analysis import (BASELINE_END, BASELINE_START, add_anomaly,
                           city_summary, seasonal_trends)
 from src.fetch import fetch_all
-from src.plots import (plot_anomaly, plot_hot_days, plot_monthly_heatmap,
-                       plot_temperature)
-from src.process import (HOT_DAY_THRESHOLD, load_data, monthly_summary,
-                         yearly_summary)
+from src.plots import (plot_anomaly, plot_heavy_rain_days, plot_hot_days,
+                       plot_monthly_heatmap, plot_temperature)
+from src.process import (HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD, load_data,
+                         monthly_summary, yearly_summary)
 
 
 @st.cache_data
@@ -90,6 +90,7 @@ col3.metric("Hot days trend", f"{row['hot_days_change_per_decade']:+} days / dec
 st.header("Comparing cities")
 show(plot_temperature(yearly, cities))
 show(plot_hot_days(yearly, cities))
+show(plot_heavy_rain_days(yearly, cities))
 
 st.subheader("Summary table")
 table = summary[summary["city"].isin(cities)]
@@ -103,4 +104,5 @@ show(plot_anomaly(yearly, focus_city, window))
 show(plot_monthly_heatmap(monthly, focus_city))
 
 st.caption(f"Hot day = maximum temperature of {HOT_DAY_THRESHOLD} °C "
+           f"or more. Heavy rain day = {HEAVY_RAIN_THRESHOLD} mm of rain "
            f"or more. Anomaly baseline: {BASELINE_START} to {BASELINE_END}.")

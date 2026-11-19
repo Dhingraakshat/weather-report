@@ -49,6 +49,20 @@ def test_hot_days_counts_years_with_zero():
     assert result["rain"].tolist() == [2.0, 2.0]
 
 
+def test_heavy_rain_days_counts_years_with_zero():
+    """Years with no heavy rain days must be counted as 0, not left out."""
+    daily = pd.DataFrame({
+        "city": ["Milan"] * 4,
+        "date": pd.to_datetime(["2000-10-01", "2000-10-02",
+                                "2001-10-01", "2001-10-02"]),
+        "temp_mean": [15.0, 15.0, 15.0, 15.0],
+        "temp_max": [20.0, 20.0, 20.0, 20.0],
+        "rain": [25.0, 20.0, 19.9, 0.0],
+    })
+    result = yearly_summary(daily)
+    assert result["heavy_rain_days"].tolist() == [2, 0]
+
+
 def test_load_data_without_files_gives_error(tmp_path):
     """An empty data folder must give a FileNotFoundError."""
     with pytest.raises(FileNotFoundError):

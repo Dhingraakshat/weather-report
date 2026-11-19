@@ -5,6 +5,7 @@ import pandas as pd
 from src.fetch import DATA_DIR
 
 HOT_DAY_THRESHOLD = 30  # °C, a day with max temperature >= 30 counts as "hot"
+HEAVY_RAIN_THRESHOLD = 20  # mm, a day with rain >= 20 counts as "heavy rain"
 
 
 def load_data(data_dir=DATA_DIR):
@@ -47,17 +48,19 @@ def yearly_summary(df):
     -------
     pandas.DataFrame
         One row per city per year with average temperatures,
-        total rain and number of hot days.
+        total rain, number of hot days and number of heavy rain days.
     """
     df = df.copy()
     df["year"] = df["date"].dt.year
     df["hot_day"] = df["temp_max"] >= HOT_DAY_THRESHOLD
+    df["heavy_rain_day"] = df["rain"] >= HEAVY_RAIN_THRESHOLD
 
     yearly = df.groupby(["city", "year"]).agg(
         temp_mean=("temp_mean", "mean"),
         temp_max=("temp_max", "mean"),
         rain=("rain", "sum"),
         hot_days=("hot_day", "sum"),
+        heavy_rain_days=("heavy_rain_day", "sum"),
     )
     return yearly.reset_index()
 

@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 
 from src.analysis import BASELINE_END, BASELINE_START, trend_line
-from src.process import HOT_DAY_THRESHOLD
+from src.process import HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD
 
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -127,6 +127,32 @@ def plot_hot_days(yearly, cities):
     return fig
 
 
+def plot_heavy_rain_days(yearly, cities):
+    """Line chart of the number of heavy rain days per year for each city.
+
+    Parameters
+    ----------
+    yearly : pandas.DataFrame
+        Yearly data from process.yearly_summary().
+    cities : list of str
+        Cities to show.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The finished chart.
+    """
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for city in cities:
+        data = yearly[yearly["city"] == city]
+        ax.plot(data["year"], data["heavy_rain_days"], label=city)
+    ax.set_xlabel("Year")
+    ax.set_ylabel(f"Days with rain ≥ {HEAVY_RAIN_THRESHOLD} mm")
+    ax.set_title("Heavy rain days per year")
+    ax.legend()
+    return fig
+
+
 if __name__ == "__main__":
     from pathlib import Path
 
@@ -146,6 +172,7 @@ if __name__ == "__main__":
         "anomaly_milan.png": plot_anomaly(yearly, "Milan"),
         "heatmap_milan.png": plot_monthly_heatmap(monthly, "Milan"),
         "hot_days.png": plot_hot_days(yearly, cities),
+        "heavy_rain_days.png": plot_heavy_rain_days(yearly, cities),
     }
     for filename, fig in charts.items():
         fig.savefig(output_dir / filename, dpi=150, bbox_inches="tight")

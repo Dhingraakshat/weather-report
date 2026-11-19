@@ -136,17 +136,22 @@ def city_summary(yearly, period=30):
     -------
     pandas.DataFrame
         One row per city with warming trend, old vs recent
-        temperature and change in hot days.
+        temperature, change in hot days, rain trend and change
+        in heavy rain days.
     """
     rows = []
     for city, group in yearly.groupby("city"):
         years = group["year"].to_numpy()
         temps = group["temp_mean"].to_numpy()
         hot_days = group["hot_days"].to_numpy()
+        rain = group["rain"].to_numpy()
+        heavy_rain_days = group["heavy_rain_days"].to_numpy()
 
         old_avg = np.mean(temps[:period])
         recent_avg = np.mean(temps[-period:])
         warming, p_value = trend_test(years, temps)
+        rain_change, rain_p_value = trend_test(years, rain)
+        heavy_rain_change = trend_per_decade(years, heavy_rain_days)
 
         rows.append({
             "city": city,
@@ -157,6 +162,9 @@ def city_summary(yearly, period=30):
             "recent_avg_temp": round(recent_avg, 2),
             "difference": round(recent_avg - old_avg, 2),
             "hot_days_change_per_decade": round(trend_per_decade(years, hot_days), 1),
+            "rain_change_per_decade": round(rain_change, 1),
+            "rain_p_value": round(rain_p_value, 4),
+            "heavy_rain_days_change_per_decade": round(heavy_rain_change, 1),
         })
     return pd.DataFrame(rows)
 
