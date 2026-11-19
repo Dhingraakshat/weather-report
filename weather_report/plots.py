@@ -5,11 +5,20 @@ import matplotlib.pyplot as plt
 from weather_report.analysis import BASELINE_END, BASELINE_START, trend_line
 from weather_report.process import HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD
 
+# One fixed colour per city, the same in every chart.
+# These colours are easy to tell apart, also for colour-blind people.
+CITY_COLORS = {
+    "Milan": "tab:blue",
+    "Rome": "tab:orange",
+    "Riga": "tab:green",
+    "Delhi": "tab:purple",
+}
+
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-def plot_temperature(yearly, cities):
+def plot_temperature(yearly, cities, title=None):
     """Line chart of yearly average temperature with a trend line per city.
 
     Parameters
@@ -18,26 +27,33 @@ def plot_temperature(yearly, cities):
         Yearly data from process.yearly_summary().
     cities : list of str
         Cities to show.
+    title : str, optional
+        Chart title. If not given, a neutral title is used.
 
     Returns
     -------
     matplotlib.figure.Figure
         The finished chart.
     """
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
-        line = ax.plot(data["year"], data["temp_mean"], label=city, alpha=0.6)[0]
+        color = CITY_COLORS[city]
+        ax.plot(data["year"], data["temp_mean"], color=color, label=city,
+                alpha=0.6)
         ax.plot(data["year"], trend_line(data["year"], data["temp_mean"]),
-                color=line.get_color(), linestyle="--")
+                color=color, linestyle="--")
+    if title is None:
+        title = "Yearly average temperature"
     ax.set_xlabel("Year")
     ax.set_ylabel("Average temperature (°C)")
-    ax.set_title("Yearly average temperature (dashed = trend)")
+    ax.set_title(f"{title} (dashed line = trend)")
+    ax.spines[["top", "right"]].set_visible(False)
     ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
     return fig
 
 
-def plot_anomaly(yearly, city, window=10):
+def plot_anomaly(yearly, city, window=10, title=None):
     """Bar chart of yearly temperature anomaly with a moving average line.
 
     Parameters
@@ -48,6 +64,8 @@ def plot_anomaly(yearly, city, window=10):
         City to show.
     window : int
         Number of years used for the moving average.
+    title : str, optional
+        Chart title. If not given, a neutral title is used.
 
     Returns
     -------
@@ -58,19 +76,22 @@ def plot_anomaly(yearly, city, window=10):
     colors = ["tab:red" if value > 0 else "tab:blue" for value in data["anomaly"]]
     moving_avg = data["anomaly"].rolling(window).mean()
 
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, ax = plt.subplots(figsize=(10, 4), layout="constrained")
     ax.bar(data["year"], data["anomaly"], color=colors)
     ax.plot(data["year"], moving_avg, color="black", label=f"{window}-year average")
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_xlabel("Year")
     ax.set_ylabel("Anomaly (°C)")
-    ax.set_title(f"{city}: temperature compared to "
+    if title is None:
+        title = (f"{city}: temperature compared to the "
                  f"{BASELINE_START}-{BASELINE_END} average")
+    ax.set_title(title)
+    ax.spines[["top", "right"]].set_visible(False)
     ax.legend()
     return fig
 
 
-def plot_monthly_heatmap(monthly, city):
+def plot_monthly_heatmap(monthly, city, title=None):
     """Heatmap of each month of each year, compared to that month's average.
 
     Parameters
@@ -79,6 +100,8 @@ def plot_monthly_heatmap(monthly, city):
         Monthly data from process.monthly_summary().
     city : str
         City to show.
+    title : str, optional
+        Chart title. If not given, a neutral title is used.
 
     Returns
     -------
@@ -90,18 +113,22 @@ def plot_monthly_heatmap(monthly, city):
     table = table.sub(table.mean(axis=1), axis=0)
 
     first_year, last_year = table.columns.min(), table.columns.max()
-    fig, ax = plt.subplots(figsize=(12, 4))
+    fig, ax = plt.subplots(figsize=(12, 4), layout="constrained")
     image = ax.imshow(table, aspect="auto", cmap="coolwarm", vmin=-4, vmax=4,
                       extent=[first_year - 0.5, last_year + 0.5, 12.5, 0.5])
     fig.colorbar(image, ax=ax, label="°C vs month average")
     ax.set_yticks(range(1, 13))
     ax.set_yticklabels(MONTH_NAMES)
+    if title is None:
+        title = f"{city}: monthly temperature, warmer or colder than usual"
     ax.set_xlabel("Year")
-    ax.set_title(f"{city}: monthly temperature, warmer or colder than usual")
+    ax.set_ylabel("Month")
+    ax.set_title(title)
+    ax.spines[["top", "right"]].set_visible(False)
     return fig
 
 
-def plot_hot_days(yearly, cities):
+def plot_hot_days(yearly, cities, title=None):
     """Line chart of the number of hot days per year for each city.
 
     Parameters
@@ -110,24 +137,30 @@ def plot_hot_days(yearly, cities):
         Yearly data from process.yearly_summary().
     cities : list of str
         Cities to show.
+    title : str, optional
+        Chart title. If not given, a neutral title is used.
 
     Returns
     -------
     matplotlib.figure.Figure
         The finished chart.
     """
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
-        ax.plot(data["year"], data["hot_days"], label=city)
+        ax.plot(data["year"], data["hot_days"], color=CITY_COLORS[city],
+                label=city)
+    if title is None:
+        title = "Hot days per year"
     ax.set_xlabel("Year")
-    ax.set_ylabel(f"Days with max temperature ≥ {HOT_DAY_THRESHOLD}°C")
-    ax.set_title("Hot days per year")
+    ax.set_ylabel(f"Days with max temperature ≥ {HOT_DAY_THRESHOLD} °C")
+    ax.set_title(title)
+    ax.spines[["top", "right"]].set_visible(False)
     ax.legend()
     return fig
 
 
-def plot_heavy_rain_days(yearly, cities):
+def plot_heavy_rain_days(yearly, cities, title=None):
     """Line chart of the number of heavy rain days per year for each city.
 
     Parameters
@@ -136,19 +169,25 @@ def plot_heavy_rain_days(yearly, cities):
         Yearly data from process.yearly_summary().
     cities : list of str
         Cities to show.
+    title : str, optional
+        Chart title. If not given, a neutral title is used.
 
     Returns
     -------
     matplotlib.figure.Figure
         The finished chart.
     """
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
-        ax.plot(data["year"], data["heavy_rain_days"], label=city)
+        ax.plot(data["year"], data["heavy_rain_days"],
+                color=CITY_COLORS[city], label=city)
+    if title is None:
+        title = "Heavy rain days per year"
     ax.set_xlabel("Year")
     ax.set_ylabel(f"Days with rain ≥ {HEAVY_RAIN_THRESHOLD} mm")
-    ax.set_title("Heavy rain days per year")
+    ax.set_title(title)
+    ax.spines[["top", "right"]].set_visible(False)
     ax.legend()
     return fig
 
@@ -168,12 +207,25 @@ if __name__ == "__main__":
     output_dir = Path("figures")
     output_dir.mkdir(exist_ok=True)
 
+    # The saved charts always show all the data, so their titles can say
+    # the main message. I checked each message with the numbers.
     charts = {
-        "temperature.png": plot_temperature(yearly, cities),
-        "anomaly_milan.png": plot_anomaly(yearly, "Milan"),
-        "heatmap_milan.png": plot_monthly_heatmap(monthly, "Milan"),
-        "hot_days.png": plot_hot_days(yearly, cities),
-        "heavy_rain_days.png": plot_heavy_rain_days(yearly, cities),
+        "temperature.png": plot_temperature(
+            yearly, cities,
+            title="Milan, Rome and Riga get warmer, Delhi does not"),
+        "anomaly_milan.png": plot_anomaly(
+            yearly, "Milan",
+            title="Milan: every year since 1985 was warmer than "
+                  "the 1961-1990 average"),
+        "heatmap_milan.png": plot_monthly_heatmap(
+            monthly, "Milan",
+            title="Milan: since 1990, most months are warmer than usual"),
+        "hot_days.png": plot_hot_days(
+            yearly, cities,
+            title="Milan and Rome now have many more hot days than before"),
+        "heavy_rain_days.png": plot_heavy_rain_days(
+            yearly, cities,
+            title="Heavy rain days go up and down, with no clear trend"),
     }
     for filename, fig in charts.items():
         fig.savefig(output_dir / filename, dpi=150, bbox_inches="tight")
