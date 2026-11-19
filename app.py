@@ -8,7 +8,7 @@ from src.fetch import fetch_all
 from src.plots import (plot_anomaly, plot_hot_days, plot_monthly_heatmap,
                        plot_temperature)
 from src.process import load_data, monthly_summary, yearly_summary
-
+from src.analysis import add_anomaly, city_summary, seasonal_trends
 
 @st.cache_data
 def get_data():
@@ -83,7 +83,8 @@ table = summary[summary["city"].isin(cities)]
 st.dataframe(table, hide_index=True)
 st.download_button("Download table as CSV", table.to_csv(index=False),
                    file_name="climate_summary.csv", mime="text/csv")
-
+st.subheader("Warming by season (°C per decade)")
+st.dataframe(seasonal_trends(monthly))
 st.header(f"{focus_city} in detail")
 show(plot_anomaly(yearly, focus_city, window))
 show(plot_monthly_heatmap(monthly, focus_city))

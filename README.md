@@ -113,6 +113,7 @@ What I found:
 - I use 30 °C as a hot day for all cities, but a hot day in Riga is not the same as a hot day in Delhi.
 - A straight line is a simple way to show the trend. In reality, the warming is faster in the last years than at the start.
 - The p-value test thinks that every year is independent. But a warm year is often followed by another warm year, so the real p-values are probably a bit bigger. For Milan, Rome and Riga they are so small that this does not change the result.
+- For seasons, I put December in the same year as January and February. Climate studies usually put it with the next year. This changes the results only very little.
 
 ## Problems I had
 

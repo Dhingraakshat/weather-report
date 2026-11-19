@@ -85,6 +85,39 @@ def trend_test(years, values):
     result = stats.linregress(years, values)
     return result.slope * 10, result.pvalue
 
+SEASONS = {12: "Winter", 1: "Winter", 2: "Winter",
+           3: "Spring", 4: "Spring", 5: "Spring",
+           6: "Summer", 7: "Summer", 8: "Summer",
+           9: "Autumn", 10: "Autumn", 11: "Autumn"}
+
+
+def seasonal_trends(monthly):
+    """Warming per decade for each city and each season.
+
+    Parameters
+    ----------
+    monthly : pandas.DataFrame
+        Monthly data from process.monthly_summary().
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per city and one column per season, in °C per decade.
+    """
+    monthly = monthly.copy()
+    monthly["season"] = monthly["month"].map(SEASONS)
+    seasonal = monthly.groupby(["city", "season", "year"])["temp_mean"].mean().reset_index()
+
+    rows = []
+    for (city, season), group in seasonal.groupby(["city", "season"]):
+        rows.append({
+            "city": city,
+            "season": season,
+            "warming_per_decade": round(trend_per_decade(group["year"], group["temp_mean"]), 2),
+        })
+    table = pd.DataFrame(rows).pivot(index="city", columns="season", values="warming_per_decade")
+    return table[["Winter", "Spring", "Summer", "Autumn"]]
+
 def city_summary(yearly, period=30):
     """Build a table with the main climate numbers for each city.
 
@@ -125,7 +158,9 @@ def city_summary(yearly, period=30):
 
 
 if __name__ == "__main__":
-    from src.process import load_data, yearly_summary
+    from src.process import load_data, monthly_summary, yearly_summary
 
-    yearly = add_anomaly(yearly_summary(load_data()))
+    daily = load_data()
+    yearly = add_anomaly(yearly_summary(daily))
     print(city_summary(yearly))
+    print(seasonal_trends(monthly_summary(daily)))
