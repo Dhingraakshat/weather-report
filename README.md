@@ -84,7 +84,7 @@ I wrote some small tests with pytest. They check the trend, the anomaly, the hot
 - To check if the trend is real or just random, I used `scipy.stats.linregress`. It gives a p-value. If the p-value is smaller than 0.05, I say the trend is significant.
 - I also compared the average of the first 30 years (1950 to 1979) with the last 30 years (1996 to 2025).
 - In the heatmap, I compare every month with the normal value for that month. Without this, the chart only shows that summer is hot and winter is cold.
-
+- I also calculated the trend for each season (winter, spring, summer, autumn), to see if some parts of the year get warmer faster than others.
 ## Results
 
 | City | Change per 10 years (°C) | p-value | Significant | First 30 years (°C) | Last 30 years (°C) | Difference (°C) | Hot days, change per 10 years |
@@ -94,6 +94,15 @@ I wrote some small tests with pytest. They check the trend, the anomaly, the hot
 | Riga | +0.33 | < 0.0001 | Yes | 6.20 | 7.68 | +1.49 | +0.4 |
 | Delhi | -0.03 | 0.34 | No | 24.75 | 24.59 | -0.16 | +1.0 |
 
+
+Warming by season (°C per 10 years):
+
+| City | Winter | Spring | Summer | Autumn |
+|---|---|---|---|---|
+| Milan | +0.43 | +0.36 | +0.53 | +0.31 |
+| Rome | +0.15 | +0.23 | +0.40 | +0.23 |
+| Riga | +0.47 | +0.42 | +0.23 | +0.19 |
+| Delhi | -0.03 | -0.11 | -0.09 | +0.13 |
 What I found:
 
 - Milan gets warmer faster than the other cities. Since 1950 it is about 3 °C warmer. Almost every year after 1990 was warmer than the 1961 to 1990 average.
@@ -101,6 +110,7 @@ What I found:
 - Rome gets warmer more slowly than Milan, but it gets more new hot days. I think this is because summers in Rome were already close to 30 °C, so a small change makes many more days go over 30 °C.
 - Riga gets warmer too, but it still has almost no hot days, because it is rarely that hot there.
 - - Delhi does not show a warming trend in this data. The p-value is 0.34, so the small change could be just random. I was surprised by this. Some studies say that air pollution and more irrigation in north India can make temperatures lower, but I did not test this in my project.
+- In Milan and Rome, summer gets warmer the fastest. In Riga it is the opposite: winter and spring get warmer faster than summer. This is also why Riga still has almost no hot days. For Delhi the values are small and go in both directions, so there is no clear change.
 
 ![Yearly temperature](figures/temperature.png)
 ![Milan anomaly](figures/anomaly_milan.png)
