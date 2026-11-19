@@ -23,7 +23,7 @@ It is free and you do not need an API key. For every day I download:
 - the max temperature
 - the total rain
 
-The data is not saved in this repository. The script `weather_report/fetch.py` downloads it into the `data` folder. The app also does this by itself the first time you run it.
+The data is not saved in this repository. The script `weather_report/fetch.py` downloads it into the `data` folder. The app also does this by itself the first time you run it. The first download takes about 4 minutes, because the program waits 60 seconds between cities (see "Problems I had"). After that, the data is saved and the app starts quickly.
 
 ## Libraries
 
@@ -41,8 +41,8 @@ I also used Ruff (version 0.17.5) to check the code and to format it in the PEP 
 
 ```bash
 pip install ruff
-ruff check .
-ruff format .
+python -m ruff check .
+python -m ruff format .
 ```
 
 ## Files
@@ -118,6 +118,8 @@ python -m pytest
 - In the heatmap, I compare every month with the normal value for that month. Without this, the chart only shows that summer is hot and winter is cold.
 - I also calculated the trend for each season (winter, spring, summer, autumn), to see if some parts of the year get warmer faster than others.
 - For rain, I calculated the trend of the total rain per year (with its p-value) and the trend of the number of heavy rain days. In the notebook I tried 10, 20 and 50 mm for a heavy rain day. 10 mm is too common and 50 mm is too rare, so I chose 20 mm (about 17 days a year in Milan).
+- I handle errors when I download the data. If the API does not answer within 60 seconds, the program stops with a clear message about the timeout. If the download fails in another way (for example no internet, or the API says "too many requests"), the message says which city failed and why. If there is no data yet, `load_data` tells you to run `python -m weather_report.fetch` first.
+- In the charts, every city always has the same colour, and the colours are easy to tell apart also for colour-blind people. The saved charts in the `figures` folder have a title that says the main message. In the app the titles are neutral, because the message can change when you choose other cities or years.
 
 ## Results
 
@@ -127,7 +129,6 @@ python -m pytest
 | Rome | +0.25 | < 0.0001 | Yes | 14.74 | 15.92 | +1.18 | +6.7 |
 | Riga | +0.33 | < 0.0001 | Yes | 6.20 | 7.68 | +1.49 | +0.4 |
 | Delhi | -0.03 | 0.34 | No | 24.75 | 24.59 | -0.16 | +1.0 |
-
 
 Warming by season (°C per 10 years):
 
@@ -149,7 +150,7 @@ Rain:
 
 What I found:
 
-- Milan gets warmer faster than the other cities. The trend line goes up about 3 °C from 1950 to 2025 (0.41 °C per 10 years for 7.5 decades). The last 30 years are 1.93 °C warmer than the first 30 years. Every year after 1990 was warmer than the 1961 to 1990 average.
+- Milan gets warmer faster than the other cities. The trend line goes up about 3 °C from 1950 to 2025 (0.41 °C per 10 years for 7.5 decades). The last 30 years are 1.93 °C warmer than the first 30 years. Every year since 1985 was warmer than the 1961 to 1990 average.
 - The warming happens in all months, also in winter, not only in summer.
 - Rome gets warmer more slowly than Milan, but it gets more new hot days. I think this is because summers in Rome were already close to 30 °C, so a small change makes many more days go over 30 °C.
 - Riga gets warmer too, but it still has almost no hot days, because it is rarely that hot there.
