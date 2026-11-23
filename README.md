@@ -2,7 +2,7 @@
 
 This is my project for the Python module of the course Coding for Data Science and Data Management (University of Milan, 2026/27).
 
-I wanted to check if the climate in Milan is really getting warmer, and how Milan compares to other cities. I chose Rome because it is another big Italian city, Riga because I studied there, and Delhi because I am from India. I use daily weather data from 1950 to 2025.
+I compare Milan with three cities that have very different climates: Riga (cold, northern Europe), Rome (Mediterranean, near the sea) and Delhi (subtropical). I know these cities personally, but I chose them because together they go from north to south, so I can see if the warming is different in different climates. I use only four cities so the charts stay easy to read. To add another city, you only need to add one line to the `CITIES` dictionary in `weather_report/fetch.py`. I use daily weather data from 1950 to 2025.
 
 ## Questions I want to answer
 
