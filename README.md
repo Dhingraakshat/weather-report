@@ -172,7 +172,8 @@ What I found:
 - A straight line is a simple way to show the trend. In reality, the warming is faster in the last years than at the start.
 - The p-value test thinks that every year is independent. But a warm year is often followed by another warm year, so the real p-values are probably a bit bigger. For Milan, Rome and Riga they are so small that this does not change the result.
 - For seasons, I put December in the same year as January and February. Climate studies usually put it with the next year. This changes the results only very little.
-
+- Four cities are not enough to say something about Europe or the world. The results are only about these four places.
+- 
 ## Problems I had
 
 - At first, only Milan and Rome downloaded. The API stopped me because I sent too many requests too fast. First I added a pause of 5 seconds between cities, but this was not enough on a new computer: the download still stopped after two cities. The API has a limit per minute, so now the pause is 60 seconds. The first download takes about 4 minutes, but all four cities work in one run. If the download still stops, wait one minute and run it again. Cities that are already downloaded are skipped.
