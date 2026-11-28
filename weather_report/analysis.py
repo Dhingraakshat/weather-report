@@ -24,99 +24,51 @@ SEASONS = {
 
 
 def add_anomaly(yearly, start=BASELINE_START, end=BASELINE_END):
-    """Add the temperature anomaly compared to a baseline period.
+    """Add each year's temperature difference from its city's baseline.
 
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data from process.yearly_summary().
-    start, end : int
-        First and last year of the baseline ("normal") period.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Same table with an extra 'anomaly' column in °C.
+    A positive anomaly means warmer than the baseline average; a negative
+    one means colder. The input table is left unchanged.
     """
     yearly = yearly.copy()
     in_baseline = yearly["year"].between(start, end)
+    # Give each city its own reference average.
     baseline = yearly[in_baseline].groupby("city")["temp_mean"].mean()
     yearly["anomaly"] = yearly["temp_mean"] - yearly["city"].map(baseline)
     return yearly
 
 
 def trend_per_decade(years, values):
-    """Fit a straight line and return how much the values change per decade.
+    """Estimate the change per decade from matching years and measurements.
 
-    Parameters
-    ----------
-    years : array-like
-        The years (x axis).
-    values : array-like
-        The values for each year (y axis), e.g. temperatures.
-
-    Returns
-    -------
-    float
-        Change per 10 years.
+    The slope is per year, so multiply it by 10 to report a per-decade rate.
     """
     slope, _ = np.polyfit(years, values, deg=1)
     return slope * 10
 
 
 def trend_line(years, values):
-    """Return the points of the best-fit straight line, used for plotting.
-
-    Parameters
-    ----------
-    years : array-like
-        The years (x axis).
-    values : array-like
-        The values for each year (y axis).
-
-    Returns
-    -------
-    numpy.ndarray
-        The y value of the trend line for each year.
-    """
+    """Return the fitted value for each year, ready to draw as a chart line."""
     slope, intercept = np.polyfit(years, values, deg=1)
     return slope * np.asarray(years) + intercept
 
 
 def trend_test(years, values):
-    """Fit a straight line and test if the trend is significant.
+    """Return the fitted change per decade and its p-value.
 
-    Parameters
-    ----------
-    years : array-like
-        The years (x axis).
-    values : array-like
-        The values for each year (y axis).
-
-    Returns
-    -------
-    tuple of float
-        Change per decade and the p-value of the trend.
+    A small p-value is evidence of a trend, not proof of what caused it.
     """
     result = stats.linregress(years, values)
     return result.slope * 10, result.pvalue
 
 
 def seasonal_trends(monthly):
-    """Warming per decade for each city and each season.
+    """Calculate each city's temperature trend in each season.
 
-    Parameters
-    ----------
-    monthly : pandas.DataFrame
-        Monthly data from process.monthly_summary().
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per city and one column per season, in °C per decade.
+    December is grouped with January and February of the same year.
     """
     monthly = monthly.copy()
     monthly["season"] = monthly["month"].map(SEASONS)
+    # Average the monthly values first, giving one value per season and year.
     seasonal = (
         monthly.groupby(["city", "season", "year"])["temp_mean"]
         .mean()
@@ -136,34 +88,25 @@ def seasonal_trends(monthly):
     table = pd.DataFrame(rows).pivot(
         index="city", columns="season", values="warming_per_decade"
     )
+    # Keep the season columns in calendar order.
     return table[["Winter", "Spring", "Summer", "Autumn"]]
 
 
 def city_summary(yearly, period=30):
-    """Build a table with the main climate numbers for each city.
+    """Build one row of trend and comparison results for each city.
 
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data from process.yearly_summary().
-    period : int
-        Number of years used for the "old" and "recent" averages.
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per city with warming trend, old vs recent
-        temperature, change in hot days, rain trend and change
-        in heavy rain days.
+    ``period`` sets how many years to average at the start and end.
     """
     rows = []
     for city, group in yearly.groupby("city"):
+        # Keep each measurement paired with the same year's data.
         years = group["year"].to_numpy()
         temps = group["temp_mean"].to_numpy()
         hot_days = group["hot_days"].to_numpy()
         rain = group["rain"].to_numpy()
         heavy_rain_days = group["heavy_rain_days"].to_numpy()
 
+        # Compare equally sized periods at the two ends of the record.
         old_avg = np.mean(temps[:period])
         recent_avg = np.mean(temps[-period:])
         warming, p_value = trend_test(years, temps)
@@ -175,6 +118,7 @@ def city_summary(yearly, period=30):
                 "city": city,
                 "warming_per_decade": round(warming, 2),
                 "p_value": round(p_value, 4),
+                # The project uses 0.05 as its cutoff for significance.
                 "significant": p_value < 0.05,
                 "old_avg_temp": round(old_avg, 2),
                 "recent_avg_temp": round(recent_avg, 2),

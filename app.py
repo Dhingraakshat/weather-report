@@ -29,12 +29,10 @@ from weather_report.process import (
 
 @st.cache_data
 def get_data():
-    """Load the data (downloading it first if missing) and prepare the tables.
+    """Load the weather tables, downloading the files if they are missing.
 
-    Returns
-    -------
-    tuple of pandas.DataFrame
-        Yearly data with anomalies, and monthly data.
+    The yearly table gets a temperature anomaly column. The monthly table
+    is used for the seasonal summary and the month-by-month chart.
     """
     try:
         daily = load_data()
@@ -45,22 +43,12 @@ def get_data():
 
 
 def show(fig):
-    """Display a matplotlib figure in the app, then close it to free memory.
-
-    Parameters
-    ----------
-    fig : matplotlib.figure.Figure
-        The chart to show.
-
-    Returns
-    -------
-    None
-        The chart is shown in the app, nothing is returned.
-    """
+    """Show a chart in Streamlit, then close it to free memory."""
     st.pyplot(fig)
     plt.close(fig)
 
 
+# Set up the page before adding its title, text, and charts.
 st.set_page_config(page_title="Weather Report", layout="wide")
 st.title("Is Milan getting hotter?")
 st.write(
@@ -68,6 +56,8 @@ st.write(
     "Open-Meteo Historical Weather API."
 )
 
+# Streamlit keeps this result in its cache so the files are not reprocessed
+# every time someone changes a setting.
 with st.spinner("Loading weather data..."):
     yearly, monthly = get_data()
 
@@ -75,6 +65,7 @@ all_cities = sorted(yearly["city"].unique())
 first_year = int(yearly["year"].min())
 last_year = int(yearly["year"].max())
 
+# These controls change what the charts and summaries show.
 st.sidebar.header("Settings")
 cities = st.sidebar.multiselect(
     "Cities to compare", all_cities, default=all_cities
@@ -87,6 +78,7 @@ start, end = st.sidebar.slider(
 )
 window = st.sidebar.slider("Moving average (years)", 2, 20, 10)
 
+# Stop early if a selection cannot produce useful comparison results.
 if not cities:
     st.warning("Select at least one city in the sidebar.")
     st.stop()
@@ -95,10 +87,13 @@ if end - start < 20:
     st.warning("Please choose a period of at least 20 years.")
     st.stop()
 
+# Use the selected years in both tables so every chart covers the same period.
 yearly = yearly[yearly["year"].between(start, end)]
 monthly = monthly[monthly["year"].between(start, end)]
+# Compare up to 30 years at either end of the selected period.
 period = min(30, (end - start + 1) // 2)
 
+# The headline numbers are for the detailed-view city.
 summary = city_summary(yearly, period=period)
 row = summary[summary["city"] == focus_city].iloc[0]
 
@@ -115,6 +110,7 @@ col3.metric(
     "Hot days trend", f"{row['hot_days_change_per_decade']:+} days / decade"
 )
 
+# These charts and the downloadable table follow the city selection.
 st.header("Comparing cities")
 show(plot_temperature(yearly, cities))
 show(plot_hot_days(yearly, cities))
@@ -131,6 +127,8 @@ st.download_button(
 )
 st.subheader("Warming by season (°C per decade)")
 st.dataframe(seasonal_trends(monthly[monthly["city"].isin(cities)]))
+# The final charts focus on one city. The moving average smooths short
+# year-to-year changes in its temperature anomaly.
 st.header(f"{focus_city} in detail")
 show(plot_anomaly(yearly, focus_city, window))
 show(plot_monthly_heatmap(monthly, focus_city))

@@ -8,8 +8,8 @@ import requests
 
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 DATA_DIR = Path("data")
-PAUSE_SECONDS = 60  # pause between two downloads (API limit per minute)
-TIMEOUT_SECONDS = 60  # stop waiting if the API does not answer in time
+PAUSE_SECONDS = 60  # Wait a minute before requesting the next city.
+TIMEOUT_SECONDS = 60  # Stop waiting if the service takes too long.
 
 CITIES = {
     "Milan": (45.46, 9.19),
@@ -20,28 +20,12 @@ CITIES = {
 
 
 def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
-    """Download daily weather data for one city.
+    """Request daily temperatures and rainfall for one location and date range.
 
-    Parameters
-    ----------
-    name : str
-        City name, added as a column.
-    lat, lon : float
-        Coordinates of the city.
-    start, end : str
-        Date range in YYYY-MM-DD format.
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per day with mean/max temperature and precipitation.
-
-    Raises
-    ------
-    RuntimeError
-        If the API does not answer in time, or if the download fails
-        (no internet, wrong address, or an error from the API).
+    The city name is added to every returned row. Network problems are
+    reported as RuntimeError with a message that names the city.
     """
+    # The API needs coordinates, dates, requested measurements, and a time zone.
     params = {
         "latitude": lat,
         "longitude": lon,
@@ -56,8 +40,7 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
         )
         response.raise_for_status()
     except requests.exceptions.Timeout as error:
-        # Timeout is a special kind of RequestException,
-        # so it must come first, or this message would never be used.
+        # Handle timeouts first so they get their own clearer message.
         raise RuntimeError(
             f"The API did not answer within {TIMEOUT_SECONDS} seconds "
             f"for {name}. Please try again later."
@@ -73,20 +56,9 @@ def fetch_city(name, lat, lon, start="1950-01-01", end="2025-12-31"):
 
 
 def fetch_all(cities=CITIES):
-    """Download data for every city and save each one as a CSV in data/.
+    """Download each city's CSV, skipping files that are already present.
 
-    Cities that already have a CSV file are skipped. After each download
-    the function waits a few seconds, so the API does not block us.
-
-    Parameters
-    ----------
-    cities : dict
-        City name as key and (latitude, longitude) as value.
-
-    Returns
-    -------
-    None
-        The data is saved to files, nothing is returned.
+    ``cities`` maps names to latitude and longitude pairs.
     """
     DATA_DIR.mkdir(exist_ok=True)
     for name, (lat, lon) in cities.items():
@@ -97,7 +69,8 @@ def fetch_all(cities=CITIES):
         df = fetch_city(name, lat, lon)
         df.to_csv(path, index=False)
         print(f"{name}: saved {len(df)} rows to {path}")
-        time.sleep(PAUSE_SECONDS)  # wait, so the API does not block us
+        # Leave time before the next request to respect the API limit.
+        time.sleep(PAUSE_SECONDS)
 
 
 if __name__ == "__main__":

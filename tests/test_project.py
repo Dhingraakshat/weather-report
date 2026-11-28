@@ -9,14 +9,14 @@ from weather_report.process import load_data, yearly_summary
 
 
 def test_trend_of_straight_line():
-    """A line that goes up 0.1 per year must give a trend of 1.0 per decade."""
+    """An increase of 0.1 each year should be 1.0 per decade."""
     years = np.arange(2000, 2010)
     values = 0.1 * years
     assert trend_per_decade(years, values) == pytest.approx(1.0)
 
 
 def test_trend_test_on_straight_line():
-    """A perfect straight line must give 1.0 per decade and a small p-value."""
+    """A perfect rising line should have a strong trend signal."""
     years = np.arange(2000, 2010)
     values = 0.1 * years
     warming, p_value = trend_test(years, values)
@@ -25,7 +25,7 @@ def test_trend_test_on_straight_line():
 
 
 def test_anomaly_is_zero_on_average_in_baseline():
-    """The anomaly is the difference from the baseline average (11.0 here)."""
+    """Each anomaly is measured from the average of the chosen baseline years."""
     yearly = pd.DataFrame(
         {
             "city": ["Milan"] * 4,
@@ -38,7 +38,7 @@ def test_anomaly_is_zero_on_average_in_baseline():
 
 
 def test_hot_days_counts_years_with_zero():
-    """Years with no hot days must be counted as 0, not left out."""
+    """Keep a year in the results even when it has no hot days."""
     daily = pd.DataFrame(
         {
             "city": ["Milan"] * 4,
@@ -56,7 +56,7 @@ def test_hot_days_counts_years_with_zero():
 
 
 def test_heavy_rain_days_counts_years_with_zero():
-    """Years with no heavy rain days must be counted as 0, not left out."""
+    """Rain equal to the cutoff counts, and zero-count years stay in the table."""
     daily = pd.DataFrame(
         {
             "city": ["Milan"] * 4,
@@ -73,6 +73,6 @@ def test_heavy_rain_days_counts_years_with_zero():
 
 
 def test_load_data_without_files_gives_error(tmp_path):
-    """An empty data folder must give a FileNotFoundError."""
+    """Tell the user when there are no CSV files to load."""
     with pytest.raises(FileNotFoundError):
         load_data(tmp_path)

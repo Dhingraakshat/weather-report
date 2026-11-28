@@ -4,27 +4,14 @@ import pandas as pd
 
 from weather_report.fetch import DATA_DIR
 
-HOT_DAY_THRESHOLD = 30  # °C, a day with max temperature >= 30 counts as "hot"
-HEAVY_RAIN_THRESHOLD = 20  # mm, a day with rain >= 20 counts as "heavy rain"
+HOT_DAY_THRESHOLD = 30  # A day counts as hot at this maximum temperature (°C).
+HEAVY_RAIN_THRESHOLD = 20  # A day counts as heavy rain at this amount (mm).
 
 
 def load_data(data_dir=DATA_DIR):
-    """Load every city CSV from the data folder into one table.
+    """Join the city's daily CSV files into one table and clean the columns.
 
-    Parameters
-    ----------
-    data_dir : Path
-        Folder containing the CSV files.
-
-    Returns
-    -------
-    pandas.DataFrame
-        All cities together, one row per city per day.
-
-    Raises
-    ------
-    FileNotFoundError
-        If there are no CSV files in the folder.
+    Raises FileNotFoundError if the folder contains no CSV files.
     """
     files = list(data_dir.glob("*.csv"))
     if not files:
@@ -33,6 +20,7 @@ def load_data(data_dir=DATA_DIR):
         )
 
     df = pd.concat([pd.read_csv(file) for file in files], ignore_index=True)
+    # Shorter names make the columns easier to use in later steps.
     df = df.rename(
         columns={
             "time": "date",
@@ -42,28 +30,19 @@ def load_data(data_dir=DATA_DIR):
         }
     )
     df["date"] = pd.to_datetime(df["date"])
+    # Incomplete days cannot be included in the summaries.
     return df.dropna()
 
 
 def yearly_summary(df):
-    """Summarise each city's weather per year.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Daily data from load_data().
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per city per year with average temperatures,
-        total rain, number of hot days and number of heavy rain days.
-    """
+    """Make one row per city and year from the daily records."""
     df = df.copy()
     df["year"] = df["date"].dt.year
     df["hot_day"] = df["temp_max"] >= HOT_DAY_THRESHOLD
     df["heavy_rain_day"] = df["rain"] >= HEAVY_RAIN_THRESHOLD
 
+    # Summing True/False flags counts qualifying days, including years with 0.
+    # Rain is summed for the year; temperatures are averaged.
     yearly = df.groupby(["city", "year"]).agg(
         temp_mean=("temp_mean", "mean"),
         temp_max=("temp_max", "mean"),
@@ -75,18 +54,7 @@ def yearly_summary(df):
 
 
 def monthly_summary(df):
-    """Average temperature per city, year and month (used for heatmaps).
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Daily data from load_data().
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per city, year and month with the mean temperature.
-    """
+    """Make one row per city, year, and month for seasonal charts."""
     df = df.copy()
     df["year"] = df["date"].dt.year
     df["month"] = df["date"].dt.month

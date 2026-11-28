@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 from weather_report.analysis import BASELINE_END, BASELINE_START, trend_line
 from weather_report.process import HEAVY_RAIN_THRESHOLD, HOT_DAY_THRESHOLD
 
-# One fixed colour per city, the same in every chart.
-# These colours are easy to tell apart, also for colour-blind people.
+# Keep a city's colour the same in every chart.
 CITY_COLORS = {
     "Milan": "tab:blue",
     "Rome": "tab:orange",
@@ -31,22 +30,7 @@ MONTH_NAMES = [
 
 
 def plot_temperature(yearly, cities, title=None):
-    """Line chart of yearly average temperature with a trend line per city.
-
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data from process.yearly_summary().
-    cities : list of str
-        Cities to show.
-    title : str, optional
-        Chart title. If not given, a neutral title is used.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The finished chart.
-    """
+    """Plot yearly average temperatures and a dashed trend for each city."""
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
@@ -71,25 +55,12 @@ def plot_temperature(yearly, cities, title=None):
 
 
 def plot_anomaly(yearly, city, window=10, title=None):
-    """Bar chart of yearly temperature anomaly with a moving average line.
+    """Plot one city's anomalies and their rolling average.
 
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data with an 'anomaly' column (from analysis.add_anomaly()).
-    city : str
-        City to show.
-    window : int
-        Number of years used for the moving average.
-    title : str, optional
-        Chart title. If not given, a neutral title is used.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The finished chart.
+    ``window`` is the number of years averaged for each point on the black line.
     """
     data = yearly[yearly["city"] == city]
+    # Red bars are above the reference average; blue bars are below it.
     colors = [
         "tab:red" if value > 0 else "tab:blue" for value in data["anomaly"]
     ]
@@ -115,24 +86,10 @@ def plot_anomaly(yearly, city, window=10, title=None):
 
 
 def plot_monthly_heatmap(monthly, city, title=None):
-    """Heatmap of each month of each year, compared to that month's average.
-
-    Parameters
-    ----------
-    monthly : pandas.DataFrame
-        Monthly data from process.monthly_summary().
-    city : str
-        City to show.
-    title : str, optional
-        Chart title. If not given, a neutral title is used.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The finished chart.
-    """
+    """Show whether each month was warmer or colder than that month's average."""
     data = monthly[monthly["city"] == city]
     table = data.pivot(index="month", columns="year", values="temp_mean")
+    # Compare January with January's average, February with February's, etc.
     table = table.sub(table.mean(axis=1), axis=0)
 
     first_year, last_year = table.columns.min(), table.columns.max()
@@ -158,22 +115,7 @@ def plot_monthly_heatmap(monthly, city, title=None):
 
 
 def plot_hot_days(yearly, cities, title=None):
-    """Line chart of the number of hot days per year for each city.
-
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data from process.yearly_summary().
-    cities : list of str
-        Cities to show.
-    title : str, optional
-        Chart title. If not given, a neutral title is used.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The finished chart.
-    """
+    """Plot the yearly count of hot days for the selected cities."""
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
@@ -191,22 +133,7 @@ def plot_hot_days(yearly, cities, title=None):
 
 
 def plot_heavy_rain_days(yearly, cities, title=None):
-    """Line chart of the number of heavy rain days per year for each city.
-
-    Parameters
-    ----------
-    yearly : pandas.DataFrame
-        Yearly data from process.yearly_summary().
-    cities : list of str
-        Cities to show.
-    title : str, optional
-        Chart title. If not given, a neutral title is used.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The finished chart.
-    """
+    """Plot the yearly count of heavy-rain days for the selected cities."""
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     for city in cities:
         data = yearly[yearly["city"] == city]
@@ -244,8 +171,8 @@ if __name__ == "__main__":
     output_dir = Path("figures")
     output_dir.mkdir(exist_ok=True)
 
-    # The saved charts always show all the data, so their titles can say
-    # the main message. I checked each message with the numbers.
+    # These titles describe the full-data charts. The app uses neutral titles
+    # because its city and year selections can change.
     charts = {
         "temperature.png": plot_temperature(
             yearly,
